@@ -20,6 +20,7 @@
 #include <libcamera/base/message.h>
 #include <libcamera/base/mutex.h>
 #include <libcamera/base/object.h>
+#include "libcamera/base/backtrace.h"
 
 /**
  * \page thread Thread Support
@@ -284,6 +285,10 @@ void Thread::startThread()
 	data_->tid_ = syscall(SYS_gettid);
 	currentThreadData = data_;
 
+	Backtrace bt;
+	LOG(Thread, Debug)
+		<< " Created tid " << syscall(SYS_gettid)
+		<< " Backtrace:\n" << bt.toString();
 	setThreadAffinityInternal();
 
 	run();

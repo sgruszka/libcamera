@@ -13,6 +13,9 @@
 
 #include "libcamera/internal/v4l2_device.h"
 
+#include <libcamera/base/backtrace.h>
+#include <sys/syscall.h>
+#include <unistd.h>
 /**
  * \file delayed_controls.h
  * \brief Helper to deal with controls that take effect with a delay
@@ -148,6 +151,14 @@ void DelayedControls::reset()
  */
 bool DelayedControls::push(const ControlList &controls)
 {
+	static bool done = false;
+	if (!done) {
+		Backtrace bt; LOG(DelayedControls, Debug)
+			<< " PUSH on tid " << syscall(SYS_gettid)
+			<< " Backtrace:\n" << bt.toString();
+		done = true;
+	}
+
 	/* Copy state from previous frame. */
 	for (auto &ctrl : values_) {
 		Info &info = ctrl.second[queueCount_];
@@ -203,6 +214,15 @@ bool DelayedControls::push(const ControlList &controls)
 ControlList DelayedControls::get(uint32_t sequence)
 {
 	unsigned int index = std::max<int>(0, sequence - maxDelay_);
+
+	static bool done = false;
+	if (!done) {
+		Backtrace bt;
+		LOG(DelayedControls, Debug)
+			<< " GET on tid " << syscall(SYS_gettid)
+			<< " Backtrace:\n" << bt.toString();
+		done = true;
+	}
 
 	ControlList out(device_->controls());
 	for (const auto &ctrl : values_) {
