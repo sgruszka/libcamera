@@ -11,6 +11,7 @@
 
 #include "debayer_cpu.h"
 
+#include <Halide.h>
 #include <algorithm>
 #include <stdlib.h>
 #include <sys/ioctl.h>
@@ -805,7 +806,17 @@ void DebayerCpu::process(uint32_t frame, FrameBuffer *input, FrameBuffer *output
 		return;
 	}
 
+	constexpr int IN_SIZE = 4263168;
+	constexpr int IN_STRIDE = 3904;
+	constexpr int IN_WIDTH = IN_STRIDE / 2;
+	constexpr int IN_HEIGHT = IN_SIZE / IN_STRIDE;
+
+	const uint8_t *src = in.planes()[0].data();
+	Halide::Buffer<uint16_t> hbuf((uint16_t *)src, IN_WIDTH, IN_HEIGHT);
+
 	stats_->startFrame();
+
+	(void)hbuf(0);
 
 	if (inputConfig_.patternSize.height == 2)
 		process2(in.planes()[0].data(), out.planes()[0].data());

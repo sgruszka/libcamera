@@ -4,7 +4,7 @@ project('libcamera', 'c', 'cpp',
     meson_version : '>= 0.63',
     version : '0.5.1',
     default_options : [
-        'werror=true',
+        # 'werror=true',
         'warning_level=2',
         'cpp_std=c++17',
     ],
@@ -105,7 +105,7 @@ endif
 
 common_arguments = [
     '-Wmissing-declarations',
-    '-Wshadow',
+	#    '-Wshadow',
     '-include', meson.current_build_dir() / 'config.h',
 ]
 
@@ -194,7 +194,7 @@ cpp_arguments += common_arguments
 
 add_project_arguments(c_arguments, language : 'c')
 add_project_arguments(cpp_arguments, language : 'cpp')
-add_project_link_arguments(cpp_arguments, language : 'cpp')
+add_project_link_arguments(cpp_arguments + ['-Wl,--rpath-link=/home/stasiu/halide-install-main/lib'], language : 'cpp')
 
 libcamera_includes = include_directories('include')
 
